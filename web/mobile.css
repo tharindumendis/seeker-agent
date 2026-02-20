@@ -1,0 +1,99 @@
+/* Enhanced Mobile Optimization */
+
+/* Input Modal Styles */
+.input-modal {
+  max-width: 500px;
+}
+
+.input-prompt {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.input-response {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 0.5rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+.input-response:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.input-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+.input-modal-body {
+  padding: 1.5rem;
+}
+
+/* Pulsing animation for input modal */
+.modal.input-required {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+
+/* Mobile Responsive - Enhanced */
+@media (max-width: 768px) {
+  .container { padding: 0; }
+  
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem;
+  }
+  
+  .main-content { padding: 0.5rem; }
+  .header { padding: 0.75rem 1rem; flex-wrap: wrap; }
+  .header h1 { font-size: 1.25rem; }
+  
+  /* Touch-friendly buttons */
+  .btn-send, .btn { min-height: 44px; font-size: 1rem; }
+  .button-group { flex-direction: column; width: 100%; gap: 0.5rem; }
+  
+  /* Input optimization */
+  #messageInput { font-size: 16px; min-height: 44px; }
+  .input-response { font-size: 16px; min-height: 44px; }
+  
+  /* Full-screen modals */
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    max-height: 90vh;
+    margin: 5vh auto;
+  }
+  
+  .input-modal { max-width: 95%; }
+  .input-modal-actions { flex-direction: column; }
+  .input-modal-actions .btn { width: 100%; }
+  
+  .message { max-width: 95%; font-size: 0.9rem; }
+  .chat-messages { padding: 0.5rem; }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .btn, .modal-close { min-width: 44px; min-height: 44px; }
+  .btn, .modal-close, .quick-action-btn {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chat-messages, .modal-body { -webkit-overflow-scrolling: touch; }
+}

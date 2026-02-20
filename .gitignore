@@ -1,3 +1,11 @@
+# logs
+logs
+*.log
+
+# Cache directories (may contain sensitive data like API keys in vector DBs)
+cache/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

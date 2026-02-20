@@ -1,0 +1,35 @@
+# Tute 2 - Testing Fundamentals Answers
+
+## Short Answer Questions
+
+1) **What is quality?**  
+Quality refers to the degree to which a software product meets specified requirements and user expectations. It encompasses characteristics such as correctness, reliability, efficiency, usability, security, and maintainability.
+
+2) **What is the difference between quality assurance and testing?**  
+Quality Assurance (QA) is a proactive process focused on preventing defects by ensuring proper processes, standards, and procedures are followed throughout development. Testing is a reactive process that involves executing software to find defects and verify that the software behaves as expected.
+
+3) **How much testing is enough?**  
+There is no fixed amount of testing that is "enough." Testing should continue until acceptable risk levels are achieved, requirements coverage is sufficient, and confidence in the software's quality is established. Factors include project constraints, risk assessment, and stakeholder requirements.
+
+4) **Is the software defect-free?**  
+In practice, no software can be guaranteed to be completely defect-free. Even with extensive testing, some defects may remain undetected. The goal is to minimize defects to an acceptable level based on risk assessment and quality requirements.
+
+5) **If we don't find defects does that mean the users will accept the software?**  
+No, not finding defects during testing doesn't guarantee user acceptance. Users may still reject software due to usability issues, missing features, performance problems, or because it doesn't meet their actual needs despite being technically correct.
+
+## Multiple Choice Questions
+
+6) **Which of the statements below is the best assessment of how the test principles apply across the test life cycle?**  
+**Answer: d. Test principles affect activities throughout the test life cycle.**
+
+7) **Which of the following is most important to promote and maintain good relationships between testers and developers?**  
+**Answer: b. Explaining test results in a neutral fashion.**
+
+8) **Ensuring that test design starts during the requirements definition phase is important to enable which of the following test objectives?**  
+**Answer: a. Preventing defects in the system.**
+
+9) **Which of the following statements is true?**  
+**Answer: a. Testing cannot prove that software is correct.**
+
+10) **Which statement about combinations of inputs and preconditions is true for a large system?**  
+**Answer: d. It is not practically possible to test them all.**

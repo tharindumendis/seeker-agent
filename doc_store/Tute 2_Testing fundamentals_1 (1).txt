@@ -1,0 +1,48 @@
+Tute : Answer all questions and upload answers.  
+1) What is quality?  
+2) What is the difference between quality assurance and testing?  
+3) How much testing is enough?  
+4) Is the software defect -free?   
+5) If we don't find defects does that mean the users will accept the software?   
+-------- MCQ -------------------------------------------------------------  
+6) Which of the statements below is the best assessment of how the test principles 
+apply across the test life cycle?  
+a. Test principles only affect the prep aration for testing.  
+b. Test principles only affect test execution activities.  
+c. Testprinciplesaffecttheearlytestactivities such as a review.  
+d. Test principles affect activities throughout the test life cycle.   
+ 
+7) Which of the following is most importan t to promote and maintain good relation - 
+ships between testers and developers?  
+a. Understanding what managers value about testing.  
+b. Explaining test results in a neutral fashion.  
+c.Identifying potential customer workarounds for bugs.  
+d.Promoting better qu ality software whenever possible.   
+8) Ensuring that test design starts during the requirements definition phase is 
+important to enable which of the following test objectives?  
+a. Preventing defects in the system.  
+b. Finding defects through dynamic testing.  
+c. Gaining confidence in the system.   
+d. Finishing the project on time.  
+ 
+9) Which of the following statements is true?  
+ 
+a. Testing cannot prove that software is correct  
+ 
+b. Testing can prove that software is either correct or incorrect  
+ 
+c. Testing cannot prove that software is incorrect  
+ 
+d. Testing can prove that software is correct  
+ 
+10) Which statement about combinations of inputs and preconditions is true for a 
+large system?  
+ 
+a. It is not possible to test any of them  
+ 
+b. It is easy to test them al l in a short time  
+ 
+c. It is essential to test them all in order to do good testing  
+ 
+d. It is not practically possible to test them all  
+ 
