@@ -224,8 +224,29 @@ class SeekerAgent:
         else:
             pending_results_text = "No pending tool results."
         
+        # Build explicit tool list so the LLM is aware of every callable tool
+        tool_list_lines = []
+        native_tools = []
+        mcp_tools = []
+        for name in sorted(self.tool_registry.get_tool_names()):
+            tool = self.tool_registry.get_tool(name)
+            if name.startswith('mcp_'):
+                mcp_tools.append((name, tool.description))
+            else:
+                native_tools.append((name, tool.description))
+        
+        if native_tools:
+            tool_list_lines.append("[Native Tools]")
+            for name, desc in native_tools:
+                tool_list_lines.append(f"  • {name}: {desc}")
+        if mcp_tools:
+            tool_list_lines.append("[MCP Tools — external AI/service tools]")
+            for name, desc in mcp_tools:
+                tool_list_lines.append(f"  • {name}: {desc}")
+        available_tools_text = "\n".join(tool_list_lines)
+        
         prompt = f"""=== SYSTEM INSTRUCTIONS ===
-You are Seeker, an advanced Autonomous AI Agent.
+You are Seeker, an advanced Autonomous AI Agent NOT A CHAT BOT. if you want to interact wth user use interactive tools
 You work using the ReAct pattern: Reasoning → Acting → Observing → Reasoning → ...
 
 {insights}
@@ -237,6 +258,9 @@ You work using the ReAct pattern: Reasoning → Acting → Observing → Reasoni
 4. **If you've already gathered information, USE it - don't re-fetch**
 5. **Make progress toward your goals with each action**
 6. **Explain your reasoning BEFORE calling tools**
+
+=== AVAILABLE TOOLS ({len(native_tools)} native, {len(mcp_tools)} MCP) ===
+{available_tools_text}
 
 === CONVERSATION HISTORY ===
 {conversation_history}

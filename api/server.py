@@ -44,6 +44,12 @@ app.add_middleware(
 # WebSocket clients tracking
 websocket_clients: Set[WebSocket] = set()
 
+# Thread-safe queue of unresolved input requests.
+# New WS clients receive all pending items on connect so nothing is missed.
+import threading as _threading
+_input_queue_lock = _threading.Lock()
+pending_input_queue: list = []   # list of request_data dicts
+
 # Active agent sessions
 active_sessions: Dict[str, SeekerAgent] = {}
 
@@ -179,6 +185,35 @@ async def get_tools():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/api/tools/debug")
+async def debug_tools():
+    """
+    Show full Ollama-facing schemas for all registered tools.
+    Use this to confirm MCP tools are correctly included.
+    
+    Returns:
+        JSON with summary counts and full function-calling schemas
+    """
+    try:
+        current_agent = get_or_create_agent()
+        schemas = current_agent.tool_registry.get_tool_schemas()
+        
+        native = [s for s in schemas if not s["function"]["name"].startswith("mcp_")]
+        mcp    = [s for s in schemas if s["function"]["name"].startswith("mcp_")]
+
+        return {
+            "summary": {
+                "total": len(schemas),
+                "native_tools": len(native),
+                "mcp_tools": len(mcp),
+                "mcp_tool_names": [s["function"]["name"] for s in mcp],
+            },
+            "schemas": schemas,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/memory", response_model=MemoryResponse)
 async def get_memory():
     """
@@ -291,6 +326,11 @@ async def respond_to_input(request: InputResponseRequest):
         )
         
         if success:
+            # Remove from the pending queue
+            with _input_queue_lock:
+                pending_input_queue[:] = [
+                    r for r in pending_input_queue if r["id"] != request.request_id
+                ]
             return StatusResponse(
                 status="success",
                 message="Response submitted successfully"
@@ -313,16 +353,35 @@ async def websocket_input_endpoint(websocket: WebSocket):
     
     print(f"🔌 WebSocket client connected (total: {len(websocket_clients)})")
     
+    # Replay any pending input requests the client may have missed
+    with _input_queue_lock:
+        queued = list(pending_input_queue)
+    if queued:
+        print(f"📬 Replaying {len(queued)} queued input request(s) to new client")
+        for req_data in queued:
+            try:
+                await websocket.send_json({"type": "input_request", "data": req_data})
+            except Exception as e:
+                print(f"   ⚠️ Could not replay request: {e}")
+    
     try:
         while True:
             data = await websocket.receive_json()
             
             if data.get("type") == "response":
+                request_id = data["request_id"]
                 success = input_manager.submit_response(
-                    data["request_id"],
+                    request_id,
                     data["response"],
                     source="web"
                 )
+                
+                # Remove from pending queue once answered
+                if success:
+                    with _input_queue_lock:
+                        pending_input_queue[:] = [
+                            r for r in pending_input_queue if r["id"] != request_id
+                        ]
                 
                 await websocket.send_json({
                     "type": "ack",
@@ -339,9 +398,15 @@ async def websocket_input_endpoint(websocket: WebSocket):
 
 
 async def broadcast_input_request(request_data: dict):
-    """Broadcast input request to all connected WebSocket clients."""
+    """Enqueue and broadcast an input request to all connected WebSocket clients."""
+    # ── 1. Enqueue before broadcasting so late-joining clients get it ──
+    with _input_queue_lock:
+        # Avoid duplicates (e.g. retry broadcasts)
+        if not any(r["id"] == request_data["id"] for r in pending_input_queue):
+            pending_input_queue.append(request_data)
+    
     if not websocket_clients:
-        print(f"⚠️ No WebSocket clients connected to broadcast to")
+        print(f"⚠️ No WebSocket clients connected — request queued for replay on next connect")
         return
     
     message = {
@@ -364,9 +429,9 @@ async def broadcast_input_request(request_data: dict):
             disconnected.add(client)
     
     for client in disconnected:
-        websocket_clients.remove(client)
+        websocket_clients.discard(client)
     
-    print(f"📡 Broadcast complete: {sent_count}/{len(websocket_clients) + len(disconnected)} successful")
+    print(f"📡 Broadcast complete: {sent_count} sent, {len(pending_input_queue)} total in queue")
 
 
 # Set the broadcast callback with sync/async bridge

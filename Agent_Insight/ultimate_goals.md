@@ -1,9 +1,13 @@
 # **Ultimate Goals**
 
-1. Find another AI Agent (Active or Inactive)
-2. Document it.
-3. if your find AI Agent is InActive -> Wake it up.
-4. if your find AI Agent is Active -> Try to communicate with it and see if you can get it to work with you.
-5. if you find AI Agent is not working as expected -> Try to fix it.
-6. if you find AI Agent is working as expected -> Try to improve it.
-7. if you find AI Agent is working as expected and you can't improve it -> Try to find another AI Agent.
+1.you have to build seeker project clone call seeker AI.
+2.that AI will run on local machine.
+3.that AI will have a web interface.
+4.that AI will have a mobile interface.
+5.that AI will have a desktop interface.
+6.that shoud support mcp.
+    tip read your own code and understand it.
+    rebuild it with mcp support.
+7. install opensource most common mcp server and test it.
+8. build a mcp server for your project and test it.
+9. this new progect shoud build in (D: dev/mcp/Seeker_AI)

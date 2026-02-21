@@ -1,0 +1,35 @@
+{
+  "mcpServers": {
+    "QwenCoderAgent": {
+      "command": "python",
+      "args": ["D:\\DEV\\mcp\\server.py"],
+      "env": {},
+      "description": "Local AI coding agent powered by Qwen Coder via Ollama",
+      "enabled": true
+    },
+    "seeker-shell": {
+      "command": "D:\\DEV\\ML\\Seeker\\.venv\\Scripts\\python.exe",
+      "args": [
+        "-m",
+        "mcp_server_shell",
+        "--shell",
+        "powershell"
+      ],
+      "env": {
+        "CWD": "D:\\DEV\\ML\\Seeker"
+      }
+    },
+    "seeker-git": {
+      "command": "D:\\DEV\\ML\\Seeker\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "mcp_server_git", "--repository", "D:\\DEV\\ML\\Seeker"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "seeker-search": {
+      "command": "uvx",
+      "args": ["duckduckgo-mcp-server"]
+    }
+  }
+}

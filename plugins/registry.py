@@ -101,6 +101,20 @@ class ToolRegistry:
         
         except ImportError as e:
             print(f"Warning: Could not import tools package: {e}")
+        
+        # ── MCP server tools ────────────────────────────────────────────────
+        try:
+            from tools.mcp_tools import discover_mcp_tools
+            print("\n🔌 Discovering MCP server tools...")
+            mcp_tools = discover_mcp_tools()
+            for tool in mcp_tools:
+                self.register_tool(tool)
+            if mcp_tools:
+                print(f"✓ Registered {len(mcp_tools)} MCP tool(s)\n")
+            else:
+                print("   (no MCP servers configured or all disabled)\n")
+        except Exception as e:
+            print(f"⚠️  MCP discovery failed: {e}\n")
     
     def execute_tool(self, tool_name: str, **kwargs) -> Any:
         """

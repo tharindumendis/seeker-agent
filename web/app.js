@@ -7,8 +7,11 @@ class SeekerClient {
     this.messageCount = 0;
     this.theme = localStorage.getItem("theme") || "light";
     this.autoTriggerTimer = null;
-    this.autoTriggerDelay = 60000;
+    this.autoTriggerDelay =
+      (parseInt(localStorage.getItem("autoTriggerDelaySec"), 10) || 60) * 1000;
+    this.isPaused = false; // Pause without fully disabling autonomous mode
     this.lastAgentReplyTime = null;
+    this.lastResponseHadToolCalls = false; // Track if last reply had tool calls
     this.messageHistory = []; // New property for message history
 
     // Initialize WebSocket input client (replaces polling)
@@ -129,22 +132,63 @@ class SeekerClient {
 
     // Auto-trigger toggle
     const autoTriggerToggle = document.getElementById("autoTriggerToggle");
+    const autoTriggerControls = document.getElementById("autoTriggerControls");
+    const autoTriggerDelayInput = document.getElementById("autoTriggerDelay");
+    const autoTriggerPauseBtn = document.getElementById("autoTriggerPause");
+
     if (autoTriggerToggle) {
-      // Load saved state
       const savedState = localStorage.getItem("autoTrigger") === "true";
       autoTriggerToggle.checked = savedState;
+      if (autoTriggerControls)
+        autoTriggerControls.style.display = savedState ? "block" : "none";
 
-      // Handle toggle change
       autoTriggerToggle.addEventListener("change", (e) => {
         const isEnabled = e.target.checked;
         localStorage.setItem("autoTrigger", isEnabled.toString());
+        if (autoTriggerControls)
+          autoTriggerControls.style.display = isEnabled ? "block" : "none";
 
         if (isEnabled) {
-          console.log("✅ Auto-trigger enabled");
-          this.startAutoTrigger();
+          this.isPaused = false;
+          this.updatePauseBtn();
+          console.log("✅ Autonomous mode enabled");
         } else {
-          console.log("❌ Auto-trigger disabled");
           this.cancelAutoTrigger();
+          console.log("❌ Autonomous mode disabled");
+        }
+      });
+    }
+
+    // Delay customisation
+    if (autoTriggerDelayInput) {
+      const savedSec =
+        parseInt(localStorage.getItem("autoTriggerDelaySec"), 10) || 60;
+      autoTriggerDelayInput.value = savedSec;
+
+      autoTriggerDelayInput.addEventListener("change", () => {
+        const sec = Math.max(
+          5,
+          parseInt(autoTriggerDelayInput.value, 10) || 60,
+        );
+        autoTriggerDelayInput.value = sec;
+        localStorage.setItem("autoTriggerDelaySec", sec);
+        this.autoTriggerDelay = sec * 1000;
+        console.log(`⏱ Idle delay updated to ${sec}s`);
+      });
+    }
+
+    // Pause / Resume button
+    if (autoTriggerPauseBtn) {
+      autoTriggerPauseBtn.addEventListener("click", () => {
+        this.isPaused = !this.isPaused;
+        this.updatePauseBtn();
+        if (this.isPaused) {
+          this.cancelAutoTrigger();
+          this.updateAutoTriggerStatus("⏸ Paused");
+          console.log("⏸ Auto-trigger paused");
+        } else {
+          console.log("▶ Auto-trigger resumed");
+          this.startAutoTrigger(this.lastResponseHadToolCalls);
         }
       });
     }
@@ -262,7 +306,12 @@ class SeekerClient {
       this.messageCountEl.textContent = this.messageCount;
       this.updateMemoryStatus();
       this.setStatus("ready");
-      this.startAutoTrigger();
+
+      // Smart auto-trigger: fire immediately if agent used tools, else wait
+      const hadToolCalls =
+        Array.isArray(data.tool_calls) && data.tool_calls.length > 0;
+      this.lastResponseHadToolCalls = hadToolCalls;
+      this.startAutoTrigger(hadToolCalls);
     } catch (error) {
       console.error("Error sending message:", error);
       this.addMessage("system", `❌ Error: ${error.message}`);
@@ -315,7 +364,12 @@ class SeekerClient {
       this.messageCountEl.textContent = this.messageCount;
       this.updateMemoryStatus();
       this.setStatus("ready");
-      this.startAutoTrigger();
+
+      // Smart auto-trigger: fire immediately if agent used tools, else wait
+      const hadToolCalls =
+        Array.isArray(data.tool_calls) && data.tool_calls.length > 0;
+      this.lastResponseHadToolCalls = hadToolCalls;
+      this.startAutoTrigger(hadToolCalls);
     } catch (error) {
       console.error("Error sending no message:", error);
       this.addMessage("system", `❌ Error: ${error.message}`);
@@ -423,21 +477,53 @@ class SeekerClient {
     }
   }
 
-  startAutoTrigger() {
+  updatePauseBtn() {
+    const pauseIcon = document.getElementById("pauseIcon");
+    const resumeIcon = document.getElementById("resumeIcon");
+    if (pauseIcon) pauseIcon.style.display = this.isPaused ? "none" : "inline";
+    if (resumeIcon)
+      resumeIcon.style.display = this.isPaused ? "inline" : "none";
+  }
+
+  startAutoTrigger(immediateIfToolCall = false) {
+    // Only run if autonomous mode is enabled and not paused
+    const autoEnabled = localStorage.getItem("autoTrigger") === "true";
+    if (!autoEnabled || this.isPaused) return;
+
     this.cancelAutoTrigger();
     this.lastAgentReplyTime = Date.now();
 
-    this.autoTriggerTimer = setTimeout(() => {
-      console.log('⏰ Auto-trigger: Sending "No Message"');
-      this.sendNoMessage();
-    }, this.autoTriggerDelay);
+    if (immediateIfToolCall) {
+      // Agent used tools — chain immediately with a tiny delay just to let
+      // the UI render the previous response before firing again.
+      console.log("⚡ Auto-trigger: Tool call detected — firing immediately");
+      this.updateAutoTriggerStatus("⚡ Tool call detected — triggering now...");
+      this.autoTriggerTimer = setTimeout(() => {
+        this.sendNoMessage();
+      }, 300); // 300 ms — enough for UI to paint
+    } else {
+      // No tool calls — use normal 60-second idle delay
+      console.log("⏰ Auto-trigger: No tool call — waiting 60s");
+      this.updateAutoTriggerStatus("⏳ Idle — next trigger in 60s");
+      this.autoTriggerTimer = setTimeout(() => {
+        console.log('⏰ Auto-trigger: Sending "No Message"');
+        this.updateAutoTriggerStatus("");
+        this.sendNoMessage();
+      }, this.autoTriggerDelay);
+    }
+  }
+
+  updateAutoTriggerStatus(msg) {
+    // Update a small status label in the UI if it exists
+    const el = document.getElementById("autoTriggerStatus");
+    if (el) el.textContent = msg;
   }
 
   resetAutoTrigger() {
     if (this.autoTriggerTimer) {
       clearTimeout(this.autoTriggerTimer);
       if (this.lastAgentReplyTime) {
-        this.startAutoTrigger();
+        this.startAutoTrigger(false);
       }
     }
   }
@@ -447,6 +533,7 @@ class SeekerClient {
       clearTimeout(this.autoTriggerTimer);
       this.autoTriggerTimer = null;
     }
+    this.updateAutoTriggerStatus("");
   }
 
   async updateMemoryStatus() {

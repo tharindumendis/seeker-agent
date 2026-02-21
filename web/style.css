@@ -1223,3 +1223,112 @@ body {
   color: var(--text-secondary);
   line-height: 1.4;
 }
+
+/* Autonomous Mode — expanded controls */
+.auto-trigger-controls {
+  margin-top: var(--spacing-sm);
+  display: none; /* shown by JS when enabled */
+  animation: fadeIn 0.2s ease;
+}
+
+.delay-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+}
+
+.delay-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.delay-input {
+  width: 60px;
+  padding: 0.25rem 0.4rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-family: inherit;
+  text-align: center;
+  transition: var(--transition);
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.delay-input::-webkit-inner-spin-button,
+.delay-input::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.delay-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+.delay-unit {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* Pause / Resume button */
+.pause-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pause-btn:hover {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+  transform: scale(1.05);
+}
+
+.pause-btn:active {
+  transform: scale(0.95);
+}
+
+/* Live status line */
+.auto-trigger-status {
+  margin-top: var(--spacing-xs);
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  min-height: 1.2em;
+  transition: color 0.3s ease;
+}
+
+/* ⚡ tool-chain state gets an accent colour */
+.auto-trigger-status:not(:empty) {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+/* Input queue badge — shows "+N more waiting" */
+.queue-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  margin-left: 0.5rem;
+  background: var(--warning);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+  letter-spacing: 0.02em;
+}

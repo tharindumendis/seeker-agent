@@ -1,0 +1,15 @@
+Model Context Protocol (MCP) Information:
+
+MCP is a protocol that allows AI models to interact with external systems and tools by providing context about the current state and available actions.
+
+Key components typically include:
+1. Context providers - Supply information about the current environment
+2. Tool integrations - Allow the AI to perform actions
+3. Memory management - Store and retrieve relevant information
+4. Orchestration layer - Coordinate between different components
+
+For Seeker AI, we'll want to implement:
+1. Local web interface
+2. Mobile interface
+3. Desktop interface
+4. MCP server for communication with other systems

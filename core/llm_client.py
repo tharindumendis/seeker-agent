@@ -52,6 +52,7 @@ class LLMClient:
         
         while retry_count <= self.max_retries:
             try:
+                # print(f"tools: {tools}")
                 response = self.client.chat(
                     model=self.model_name,
                     messages=[{"role": "user", "content": prompt}],
